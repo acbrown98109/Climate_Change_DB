@@ -1,85 +1,91 @@
-CREATE TABLE "Members " (
-  "Username" VARCHAR(64),
-  "CustomerID" INT
+-- Members Table
+CREATE TABLE Members (
+    Username VARCHAR(64) PRIMARY KEY,
+    CustomerID INT
 );
 
-CREATE TABLE "Event" (
-  "EventID " INT,
-  "Username " VARCHAR,
-  "Title" VARCHAR(64),
-  "PostedDate" DATE,
-  "Description" VARCHAR,
-  "EventDate" DATE,
-  "Approved" BOOTLEAN,
-  CONSTRAINT "FK_Event.Title"
-    FOREIGN KEY ("Title")
-      REFERENCES "Members "("Username")
+-- Event Table
+CREATE TABLE Event (
+    EventID INT PRIMARY KEY,
+    Username VARCHAR(64),
+    Title VARCHAR(64),
+    PostedDate DATE,
+    Description VARCHAR(255),
+    EventDate DATE,
+    Approved BOOLEAN,
+    FOREIGN KEY (Username) REFERENCES Members(Username)
 );
 
-CREATE TABLE "Comments" (
-  "CommentID" INT,
-  "Username " VARCHAR,
-  "Comment" VARCHAR,
-  "DateSubmitted" DATE,
-  "Approved" BOOTLEAN,
-  CONSTRAINT "FK_Comments.Username "
-    FOREIGN KEY ("Username ")
-      REFERENCES "Members "("Username")
+-- Comments Table
+CREATE TABLE Comments (
+    CommentID INT PRIMARY KEY,
+    Username VARCHAR(64),
+    Comment VARCHAR(1000),
+    DateSubmitted DATE,
+    Approved BOOLEAN,
+    FOREIGN KEY (Username) REFERENCES Members(Username)
 );
 
-CREATE TABLE "CustomerInfo" (
-  "INT" <type>,
-  "BOOTLEAN" <type>,
-  "VARCHAR" <type>,
-  "VARCHAR" <type>,
-  "VARCHAR(20-25)" <type>
+-- CustomerInfo Table
+CREATE TABLE CustomerInfo (
+    CustomerID INT PRIMARY KEY,
+    Member BOOLEAN,
+    Name VARCHAR(255),
+    Email VARCHAR(255),
+    BillingAddress VARCHAR(255),
+    Phone VARCHAR(25),
+    DateAdded DATE
 );
 
-CREATE INDEX "CustomerID" ON  "CustomerInfo" ("INT");
-
-CREATE INDEX "Member" ON  "CustomerInfo" ("BOOTLEAN");
-
-CREATE INDEX "Name" ON  "CustomerInfo" ("VARCHAR");
-
-CREATE INDEX "BillingAddress" ON  "CustomerInfo" ("VARCHAR");
-
-CREATE INDEX "ShippingAddress" ON  "CustomerInfo" ("VARCHAR(20-25)");
-
-CREATE TABLE "Invoice" (
-  "InvoiceID " INT,
-  "CustomerID" INT,
-  "OrderDate" DATE,
-  "ShippingAddress" VARCHAR,
-  "ShippedDate" DATE,
-  "InvoiceItem" INT,
-  "Quanity" INT,
-  "TotalItems" INT,
-  "TotalSale" NUM(14,2),
-  CONSTRAINT "FK_Invoice.CustomerID"
-    FOREIGN KEY ("CustomerID")
-      REFERENCES "CustomerInfo"("INT"),
-  CONSTRAINT "FK_Invoice.CustomerID"
-    FOREIGN KEY ("CustomerID")
-      REFERENCES "Members "("CustomerID")
+-- Invoice Table (Invoice header only)
+CREATE TABLE Invoice (
+    InvoiceID INT PRIMARY KEY,
+    CustomerID INT,
+    DateOrdered DATE,
+    ShippingAddress VARCHAR(255),
+    DateShipped DATE,
+    FOREIGN KEY (CustomerID) REFERENCES CustomerInfo(CustomerID)
 );
 
-CREATE TABLE "Resources" (
-  "ResourceID" INT,
-  "Username " VARCHAR,
-  "Description" VARCHAR,
-  "URL" VARCHAR,
-  "SubmittedDate" DATE,
-  "Approved" BOOTLEAN,
-  CONSTRAINT "FK_Resources.Username "
-    FOREIGN KEY ("Username ")
-      REFERENCES "Members "("Username")
+-- SaleLineItem Table (Item details only)
+CREATE TABLE SaleLineItem (
+    SaleLineItemID INT PRIMARY KEY,
+    Name VARCHAR(255),
+    Description VARCHAR(255),
+    Units VARCHAR(50),
+    UnitPrice NUMERIC(14,2),
+    DateEntered DATE
 );
 
-CREATE TABLE "Entity" (
-  "InvoiceItem" VARCHAR,
-  "NumOfItem(s)" VARCHAR,
-  "PricePerItem" NUM(14,2),
-  "OnHand" INT,
-  "InventoryDate" DATE
+-- Join Table: sale_info (links Invoice and SaleLineItem)
+CREATE TABLE sale_info (
+    InvoiceID INT,
+    SaleLineItemID INT,
+    quantity INT,
+    total_cost_per_items NUMERIC(14,2),
+    total_quantity INT,
+    invoice_total NUMERIC(14,2),
+    PRIMARY KEY (InvoiceID, SaleLineItemID),
+    FOREIGN KEY (InvoiceID) REFERENCES Invoice(InvoiceID),
+    FOREIGN KEY (SaleLineItemID) REFERENCES SaleLineItem(SaleLineItemID)
 );
 
+-- Resources Table
+CREATE TABLE Resources (
+    ResourceID INT PRIMARY KEY,
+    Username VARCHAR(64),
+    Description VARCHAR(255),
+    URL VARCHAR(255),
+    SubmittedDate DATE,
+    Approved BOOLEAN,
+    FOREIGN KEY (Username) REFERENCES Members(Username)
+);
+
+-- (Optional) Entity Table for inventory/items if needed
+CREATE TABLE Entity (
+    InvoiceItem VARCHAR(255) PRIMARY KEY,
+    NumOfItems VARCHAR(50),
+    PricePerItem NUMERIC(14,2),
+    OnHand INT,
+    InventoryDate DATE
+);

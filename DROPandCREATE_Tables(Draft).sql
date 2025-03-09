@@ -1,113 +1,90 @@
-DROP TABLE IF EXISTS CustomerInfo,
-
+-- Drop and recreate CustomerInfo
+DROP TABLE IF EXISTS CustomerInfo;
 CREATE TABLE CustomerInfo (
-    CustomerID	INT,
-    Member	BOOLEAN,
-     Name	VARCHAR(512),
-    Email	VARCHAR(512),
-    BillingAddress	VARCHAR(512),
-    Phone	VARCHAR(25),
-    Date added	DATE
-),
+    CustomerID INT PRIMARY KEY,
+    Member BOOLEAN,
+    Name VARCHAR(512),
+    Email VARCHAR(512),
+    BillingAddress VARCHAR(512),
+    Phone VARCHAR(25),
+    DateAdded DATE
+);
 
-DROP TABLE IF EXISTS SaleLineItem,
-
+-- Drop and recreate SaleLineItem (basic item details)
+DROP TABLE IF EXISTS SaleLineItem;
 CREATE TABLE SaleLineItem (
-    InvoiceItemID	INT,
-    Name	VARCHAR(512),
-    Description	VARCHAR(512),
-    Units	VARCHAR(512),
-    Unit Price	NUMBER(14,2),
-    Qty	INT,
-    Date entered	DATE
-),
+    SaleLineItemID INT PRIMARY KEY,
+    Name VARCHAR(512),
+    Description VARCHAR(512),
+    Units VARCHAR(512),
+    UnitPrice NUMERIC(14,2),
+    DateEntered DATE
+);
 
-DROP TABLE IF EXISTS Invoice,
-
+-- Drop and recreate Invoice (invoice header only)
+DROP TABLE IF EXISTS Invoice;
 CREATE TABLE Invoice (
-    InvoiceID	VARCHAR(512),
-    CustomerID	INT,
-    Date Ordered	DATE,
-    Shipping Address	VARCHAR(512),
-    Date Shipped	DATE,
-    InvoiceItemID	INT,
-    SaleLineItem1	VARCHAR(512),
-    Item1Quantity	INT,
-    InvoiceItemID	INT,
-    SaleLineItem2	VARCHAR(512),
-    Item2Quantity	INT,
-    TotalItems	INT,
-    TotalSales	NUMBER(14,2)
-    CONSTRAINT "FK_Invoice.CustomerID"
-    FOREIGN KEY ("CustomerID")
-      REFERENCES "CustomerInfo"("INT"),
-  CONSTRAINT "FK_Invoice.CustomerID"
-    FOREIGN KEY ("CustomerID")
-      REFERENCES "Members "("CustomerID")
-),
-
-CREATE TABLE "Event" (
-  "EventID " INT,
-  "Username " VARCHAR,
-  "Title" VARCHAR(64),
-  "PostedDate" DATE,
-  "Description" VARCHAR,
-  "EventDate" DATE,
-  "Approved" BOOTLEAN,
-  CONSTRAINT "FK_Event.Title"
-    FOREIGN KEY ("Title")
-      REFERENCES "Members "("Username")
+    InvoiceID INT PRIMARY KEY,
+    CustomerID INT,
+    DateOrdered DATE,
+    ShippingAddress VARCHAR(512),
+    DateShipped DATE,
+    FOREIGN KEY (CustomerID) REFERENCES CustomerInfo(CustomerID)
 );
 
-CREATE TABLE "Comments" (
-  "CommentID" INT,
-  "Username " VARCHAR,
-  "Comment" VARCHAR,
-  "DateSubmitted" DATE,
-  "Approved" BOOTLEAN,
-  CONSTRAINT "FK_Comments.Username "
-    FOREIGN KEY ("Username ")
-      REFERENCES "Members "("Username")
-);
-CREATE TABLE "Members " (
-  "Username" VARCHAR(64),
-  "CustomerID" INT
-);
-CREATE TABLE "Resources" (
-  "ResourceID" INT,
-  "Username " VARCHAR,
-  "Description" VARCHAR,
-  "URL" VARCHAR,
-  "SubmittedDate" DATE,
-  "Approved" BOOTLEAN,
-  CONSTRAINT "FK_Resources.Username "
-    FOREIGN KEY ("Username ")
-      REFERENCES "Members "("Username")
+-- Create join table sale_info
+DROP TABLE IF EXISTS sale_info;
+CREATE TABLE sale_info (
+    InvoiceID INT,
+    SaleLineItemID INT,
+    quantity INT,
+    total_cost_per_items NUMERIC(14,2),
+    total_quantity INT,
+    invoice_total NUMERIC(14,2),
+    PRIMARY KEY (InvoiceID, SaleLineItemID),
+    FOREIGN KEY (InvoiceID) REFERENCES Invoice(InvoiceID),
+    FOREIGN KEY (SaleLineItemID) REFERENCES SaleLineItem(SaleLineItemID)
 );
 
+-- Drop and recreate Event
+DROP TABLE IF EXISTS Event;
+CREATE TABLE Event (
+    EventID INT PRIMARY KEY,
+    Username VARCHAR(64),
+    Title VARCHAR(64),
+    PostedDate DATE,
+    Description VARCHAR(255),
+    EventDate DATE,
+    Approved BOOLEAN,
+    FOREIGN KEY (Username) REFERENCES Members(Username)
+);
 
+-- Drop and recreate Comments
+DROP TABLE IF EXISTS Comments;
+CREATE TABLE Comments (
+    CommentID INT PRIMARY KEY,
+    Username VARCHAR(64),
+    Comment VARCHAR(1000),
+    DateSubmitted DATE,
+    Approved BOOLEAN,
+    FOREIGN KEY (Username) REFERENCES Members(Username)
+);
 
+-- Drop and recreate Members
+DROP TABLE IF EXISTS Members;
+CREATE TABLE Members (
+    Username VARCHAR(64) PRIMARY KEY,
+    CustomerID INT
+);
 
-
-
-
-
-
-
-
-
-
-
-CREATE INDEX "CustomerID" ON  "CustomerInfo" ("INT");
-
-CREATE INDEX "Member" ON  "CustomerInfo" ("BOOTLEAN");
-
-CREATE INDEX "DateAdded" ON  "CustomerInfo" ("DATE");
-
-CREATE INDEX "Email" ON  "CustomerInfo" ("VARCHAR");
-
-CREATE INDEX "Name" ON  "CustomerInfo" ("VARCHAR");
-
-CREATE INDEX "BillingAddress" ON  "CustomerInfo" ("VARCHAR");
-
-CREATE INDEX "Phone" ON  "CustomerInfo" ("VARCHAR(20-25)");
+-- Drop and recreate Resources
+DROP TABLE IF EXISTS Resources;
+CREATE TABLE Resources (
+    ResourceID INT PRIMARY KEY,
+    Username VARCHAR(64),
+    Description VARCHAR(255),
+    URL VARCHAR(255),
+    SubmittedDate DATE,
+    Approved BOOLEAN,
+    FOREIGN KEY (Username) REFERENCES Members(Username)
+);
